@@ -1,11 +1,13 @@
-package com.artemyakkonen.service;
+package com.artemyakkonen.aston_spring_boot.service;
 
-import com.artemyakkonen.dto.UserCreateDTO;
-import com.artemyakkonen.dto.UserDTO;
-import com.artemyakkonen.dto.UserUpdateDTO;
-import com.artemyakkonen.exception.UserNotFoundException;
-import com.artemyakkonen.mapper.UserMapper;
-import com.artemyakkonen.repository.UserRepository;
+import com.artemyakkonen.aston_spring_boot.dto.UserCreateDTO;
+import com.artemyakkonen.aston_spring_boot.dto.UserDTO;
+import com.artemyakkonen.aston_spring_boot.dto.UserParamsDTO;
+import com.artemyakkonen.aston_spring_boot.dto.UserUpdateDTO;
+import com.artemyakkonen.aston_spring_boot.exception.UserNotFoundException;
+import com.artemyakkonen.aston_spring_boot.mapper.UserMapper;
+import com.artemyakkonen.aston_spring_boot.repository.UserRepository;
+import com.artemyakkonen.aston_spring_boot.specification.UserSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserSpecification userSpecification;
 
     public UserDTO findUser(Long id){
         var user = userRepository.findById(id)
@@ -46,8 +49,11 @@ public class UserService {
         return userMapper.map(updatedUser);
     }
 
-    public List<UserDTO> findAllUsers(){
-        var users = userRepository.findAll();
+    public List<UserDTO> findAllUsers(UserParamsDTO params){
+        var spec = userSpecification.build(params);
+        var pageable = params.toPageable();
+        var usersPage = userRepository.findAll(spec, pageable);
+        var users = usersPage.getContent();
         return userMapper.fromUsers(users);
     }
 }

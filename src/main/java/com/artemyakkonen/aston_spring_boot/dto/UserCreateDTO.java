@@ -1,12 +1,14 @@
-package com.artemyakkonen.dto;
+package com.artemyakkonen.aston_spring_boot.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
-public class UserUpdateDTO {
+public class UserCreateDTO {
     @NotBlank
     @Size(max = 15)
     private String name;

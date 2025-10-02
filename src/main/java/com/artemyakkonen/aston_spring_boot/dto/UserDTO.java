@@ -1,4 +1,4 @@
-package com.artemyakkonen.dto;
+package com.artemyakkonen.aston_spring_boot.dto;
 
 import jakarta.persistence.Column;
 import lombok.Getter;
