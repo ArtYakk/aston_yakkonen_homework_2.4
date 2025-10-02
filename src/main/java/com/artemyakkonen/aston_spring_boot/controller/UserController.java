@@ -27,7 +27,7 @@ public class UserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    List<UserDTO> getAllUses(UserParamsDTO params){
+    List<UserDTO> getAllUses(@Valid UserParamsDTO params){
         return userService.findAllUsers(params);
     }
 
