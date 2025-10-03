@@ -9,9 +9,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+@Builder
+@AllArgsConstructor
+
 @Getter
 @Setter
 @NoArgsConstructor
+
 
 @ToString(includeFieldNames = true, onlyExplicitlyIncluded = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)

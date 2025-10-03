@@ -3,6 +3,8 @@ package com.artemyakkonen.aston_spring_boot.handler;
 import com.artemyakkonen.aston_spring_boot.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -11,14 +13,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -30,6 +28,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+
+        log.info(ex.getMessage());
+        String message = ex.getMessage() != null &&
+                (ex.getMessage().toLowerCase().contains("unique") ||
+                        ex.getMessage().toLowerCase().contains("уник"))
+                ? "Resource already exists"
+                : "Data conflict occurred";
+
+        ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), "CONFLICT", message);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @Override
@@ -55,6 +67,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
+        log.info(ex.getClass().getName());
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "INTERNAL_ERROR",

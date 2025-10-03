@@ -1,10 +1,14 @@
 package com.artemyakkonen.aston_spring_boot.dto;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.openapitools.jackson.nullable.JsonNullable;
 
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class UserUpdateDTO {
@@ -13,7 +17,7 @@ public class UserUpdateDTO {
     private JsonNullable<String> name;
 
     @Email
-    @Size(max = 20)
+    @Size(max = 30)
     private JsonNullable<String> email;
 
     @NotNull
