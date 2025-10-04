@@ -2,7 +2,6 @@ package com.artemyakkonen.aston_spring_boot.handler;
 
 import com.artemyakkonen.aston_spring_boot.exception.UserNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +21,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex) {
+        log.warn("User not found: {}", ex.getMessage());
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(),
                 "NOT_FOUND",
@@ -30,15 +31,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String errorMessage = ex.getConstraintViolations().stream()
+                .findFirst()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .orElse("Validation failed");
+
+        log.warn("Query parameter validation failed: {}", errorMessage);
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_ERROR",
+                errorMessage
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-
-        log.info(ex.getMessage());
         String message = ex.getMessage() != null &&
                 (ex.getMessage().toLowerCase().contains("unique") ||
                         ex.getMessage().toLowerCase().contains("уник"))
-                ? "Resource already exists"
+                ? "Email already exists"
                 : "Data conflict occurred";
+
+        log.warn("Data integrity violation: {}", message);
 
         ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), "CONFLICT", message);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
@@ -56,6 +74,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(FieldError::getDefaultMessage)
                 .orElse("Validation failed");
 
+        log.warn("Request body validation failed: {}", errorMessage);
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_ERROR",
@@ -67,7 +87,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex) {
-        log.info(ex.getClass().getName());
+        log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "INTERNAL_ERROR",
