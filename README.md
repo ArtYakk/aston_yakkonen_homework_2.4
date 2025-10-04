@@ -4,4 +4,4 @@ user-service на Spring с REST API, которое позволяет упра
 Заменил Hibernate из aston_yakkonen_homework_2.3 Spring Data JPA.
 Написал тесты для API при помощи mockMvc.
 
-также: частичное обновление, пагинация + сортировка, поиск с JpaSpecification, GlobalExceptionHandler, логирование, обработка ошибок, валидация.
+также: частичное обновление, пагинация + сортировка, поиск с JpaSpecification, GlobalExceptionHandler, логирование, валидация, swagger документация.
